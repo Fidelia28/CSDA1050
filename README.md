@@ -1,5 +1,6 @@
 # CSDA1050
-#TNG e-commerce and retail project
+# TNG e-commerce and retail project
+
 order_products_train = read.csv("order_products_train.csv")
 kable(head(order_products_train,5))
 str(order_products_train)
