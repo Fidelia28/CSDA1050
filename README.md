@@ -247,3 +247,5 @@ product_arrangement_1 <- products %>%
 
 treemap(product_arrangement_1, index =c("department", "aisle"), vSize = "count2", title = " ", palette = "Set2", border.col="#FFFFFF")
 
+
+
