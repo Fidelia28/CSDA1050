@@ -1,0 +1,407 @@
+order_products_train = read.csv("order_products_train.csv")
+
+kable(head(order_products_train,5))
+
+| order_id| product_id| add_to_cart_order| reordered|
+|--------:|----------:|-----------------:|---------:|
+|        1|      49302|                 1|         1|
+|        1|      11109|                 2|         1|
+|        1|      10246|                 3|         0|
+|        1|      49683|                 4|         0|
+|        1|      43633|                 5|         1|
+
+
+> str(order_products_train)
+'data.frame':	1384617 obs. of  4 variables:
+ $ order_id         : int  1 1 1 1 1 1 1 1 36 36 ...
+ $ product_id       : int  49302 11109 10246 49683 43633 13176 47209 22035 39612 19660 ...
+ $ add_to_cart_order: int  1 2 3 4 5 6 7 8 1 2 ...
+ $ reordered        : int  1 1 0 0 1 0 0 1 0 1 …
+
+
+order_products_prior1=fread("order_products_prior.csv”)
+> kable(head(order_products_prior,5))
+|  X| order_id| product_id| add_to_cart_order| reordered|
+|--:|--------:|----------:|-----------------:|---------:|
+|  0|        2|      33120|                 1|         1|
+|  1|        2|      28985|                 2|         1|
+|  2|        2|       9327|                 3|         0|
+|  3|        2|      45918|                 4|         1|
+|  4|        2|      30035|                 5|         0|
+> str(order_products_prior)
+'data.frame':	16500000 obs. of  5 variables:
+ $ X                : int  0 1 2 3 4 5 6 7 8 9 ...
+ $ order_id         : int  2 2 2 2 2 2 2 2 2 3 ...
+ $ product_id       : int  33120 28985 9327 45918 30035 17794 40141 1819 43668 33754 ...
+ $ add_to_cart_order: int  1 2 3 4 5 6 7 8 9 1 ...
+ $ reordered        : int  1 1 0 1 0 1 1 1 0 1 ...
+> glimpse(order_products_prior)
+Observations: 16,500,000
+Variables: 5
+$ X                 <int> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17...
+$ order_id          <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, ...
+$ product_id        <int> 33120, 28985, 9327, 45918, 30035, 17794, 40141, 1819, 43668,...
+$ add_to_cart_order <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, ...
+$ reordered         <int> 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, …
+
+
+> departments=read.csv("departments.csv")
+> kable(head(departments,5))
+
+| department_id|department |
+|-------------:|:----------|
+|             1|frozen     |
+|             2|other      |
+|             3|bakery     |
+|             4|produce    |
+|             5|alcohol    |
+> str(departments)
+'data.frame':	21 obs. of  2 variables:
+ $ department_id: int  1 2 3 4 5 6 7 8 9 10 ...
+ $ department   : Factor w/ 21 levels "alcohol","babies",..: 11 16 3 20 1 13 4 19 10 6 …
+
+
+> orders = read.csv("orders.csv")
+> kable(head(orders,5))
+
+| order_id| user_id|eval_set | order_number| order_dow| order_hour_of_day| days_since_prior_order|
+|--------:|-------:|:--------|------------:|---------:|-----------------:|----------------------:|
+|  2539329|       1|prior    |            1|         2|                 8|                     NA|
+|  2398795|       1|prior    |            2|         3|                 7|                     15|
+|   473747|       1|prior    |            3|         3|                12|                     21|
+|  2254736|       1|prior    |            4|         4|                 7|                     29|
+|   431534|       1|prior    |            5|         4|                15|                     28|
+> str(orders)
+'data.frame':	3421083 obs. of  7 variables:
+ $ order_id              : int  2539329 2398795 473747 2254736 431534 3367565 550135 3108588 2295261 2550362 ...
+ $ user_id               : int  1 1 1 1 1 1 1 1 1 1 ...
+ $ eval_set              : Factor w/ 3 levels "prior","test",..: 1 1 1 1 1 1 1 1 1 1 ...
+ $ order_number          : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ order_dow             : int  2 3 3 4 4 2 1 1 1 4 ...
+ $ order_hour_of_day     : int  8 7 12 7 15 7 9 14 16 8 ...
+ $ days_since_prior_order: num  NA 15 21 29 28 19 20 14 0 30 …
+
+> str(products_subset)
+'data.frame':	48170 obs. of  11 variables:
+ $ row_num      : int  0 1 2 3 4 5 6 7 8 9 ...
+ $ product_id   : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ product_name : Factor w/ 48170 levels ".5\\\" Waterproof Tape",..: 8390 1961 37439 39769 18022 12937 35552 11410 22576 40625 ...
+ $ aisle_id     : int  61 104 94 38 5 11 98 116 120 115 ...
+ $ department_id: int  19 13 7 1 13 11 7 1 16 7 ...
+ $ X            : Factor w/ 2 levels "","`": 1 1 1 1 1 1 1 1 1 1 ...
+ $ X.1          : logi  NA NA NA NA NA NA ...
+ $ X.2          : logi  NA NA NA NA NA NA ...
+ $ X.3          : logi  NA NA NA NA NA NA ...
+ $ X.4          : logi  NA NA NA NA NA NA ...
+ $ X.5          : Factor w/ 3 levels "","~)(*)(","~*()": 1 1 1 1 1 1 1 1 1 1 ...
+
+
+> products = products_subset [, c(2,3,4,5)]
+> kable(head(products, 5))
+
+
+| product_id|product_name                                                      | aisle_id| department_id|
+|----------:|:-----------------------------------------------------------------|--------:|-------------:|
+|          1|Chocolate Sandwich Cookies                                        |       61|            19|
+|          2|All-Seasons Salt                                                  |      104|            13|
+|          3|Robust Golden Unsweetened Oolong Tea                              |       94|             7|
+|          4|Smart Ones Classic Favorites Mini Rigatoni With Vodka Cream Sauce |       38|             1|
+|          5|Green Chile Anytime Sauce                                         |        5|            13|
+
+> str (products)
+'data.frame':	48170 obs. of  4 variables:
+ $ product_id   : int  1 2 3 4 5 6 7 8 9 10 ...
+ $ product_name : Factor w/ 48170 levels ".5\\\" Waterproof Tape",..: 8390 1961 37439 39769 18022 12937 35552 11410 22576 40625 ...
+ $ aisle_id     : int  61 104 94 38 5 11 98 116 120 115 ...
+ $ department_id: int  19 13 7 1 13 11 7 1 16 7 …
+
+
+
+
+> aisles =read.csv("aisles.csv")
+
+> kable(head(aisles, 5))
+
+
+| aisle_id|aisle                      |
+|--------:|:--------------------------|
+|        1|PREPARED SOUPS SALADS      |
+|        2|specialty cheeses          |
+|        3|energy granola bars        |
+|        4|INSTANT FOODS              |
+|        5|marinades meat preparation |
+
+> str (aisles)
+'data.frame':	134 obs. of  2 variables:
+ $ aisle_id: int  1 2 3 4 5 6 7 8 9 10 ...
+ $ aisle   : Factor w/ 134 levels "air fresheners candles",..: 107 121 43 75 82 92 95 6 101 77 .
+
+
+
+# Recode variables
+
+orders = orders%>% mutate(order_hour_of_day = as.numeric(order_hour_of_day), eval_set = as.factor(eval_set))
+
+> orders %>%
++   ggplot(aes(x=days_since_prior_order))+
++   geom_histogram(stat="count", fill ="purple")
+
+order_products_train = read.csv("order_products_train.csv")
+kable(head(order_products_train,5))
+str(order_products_train)
+
+order_products_prior=read.csv("order_products_prior.csv")
+order_products_prior1=fread("order_products_prior.csv")
+kable(head(order_products_prior,5))
+str(order_products_prior)
+glimpse(order_products_prior)
+
+departments=read.csv("departments.csv")
+kable(head(departments,5))
+summary(departments)
+str(departments)
+
+orders = read.csv("orders.csv")
+kable(head(orders,5))
+str(orders)
+
+products_subset = read.csv("products_subset.csv")
+kable(head(products_subset,5))
+str(products_subset)
+
+
+products_subset %>% head()
+ggplot(data = products_subset) + geom_bar(mapping = aes(x=product_name))
+
+products = products_subset [, c(2,3,4,5)]
+kable(head(products, 5))
+str (products)
+
+aisles =read.csv("aisles.csv")
+kable(head(aisles, 5))
+str (aisles)
+
+#recode variables
+orders = orders %>% mutate (order_hour_of_day = as.numeric(order_hour_of_day), eval_set = as.factor(eval_set))
+
+
+library(arules)
+library(arulesViz)
+aisles=read.csv("aisles.csv")
+head(aisles,5)
+summary(aisles)
+str(aisles)
+sample_submission=read.csv("sample_submission.csv")
+head(sample_submission,10)
+#merge order_products_train and products_subset on product_id, to include the product names in the dataset of interest 
+order_productnames_train=merge(order_products_train,products_subset, by="product_id")
+
+head(order_productnames_train,5)
+summary(order_productnames_train)
+str(order_productnames_train)
+
+
+
+
+# merge order_products_train and orders on order_id
+order_orderid_train=merge(order_products_train,orders, by="order_id")
+head(order_orderid_train,5)
+order_orderid_train_select=order_orderid_train[, c(2,4,5)]
+head(order_orderid_train_select,5)
+
+
+
+
+
+#select order_id and order_name
+order_productnames_train_select=order_productnames_train[, c(2,6)]
+head(order_productnames_train_select,5)
+summary(order_productnames_train_select)
+str(order_productnames_train_select)
+#convert the order_id to a vector of factors
+order_productnames_train_select$order_id=factor(order_productnames_train_select$order_id)
+
+# rename the order_productnames_train_select table to transaction table
+transaction_table = order_productnames_train_select
+head(transaction_table, 5)
+# view content of the transaction table 
+str(order_productnames_train_select)
+str(transaction_table)
+summary(order_productnames_train_select)
+#replace the missing category in department with 'extra'
+levels(departments$department) = c(levels (departments$department),"extra")
+departments$department<-replace(departments$department, departments$department =="missing", "extra")
+departments
+summary(transaction_table)
+
+str(transaction_table)
+
+write.csv(transaction_table, "transaction_table.csv")
+
+transaction_1 <- read.transactions(file.choose(),
+                                   format = "single", sep=",", cols =c("order_id", "product_name"))
+
+head(transaction_1,5)
+
+# training apriori function on the transaction_1 dataset
+rules = apriori (transaction_1, parameter =list (support=0.004,
+                                                 confidence =0.005))
+
+rules = apriori (transaction_1, parameter =list (support=0.004,
+                                                 confidence =0.05))
+
+LIST(head(transaction_1,5))
+
+rules_confidence <- sort(rules, by = "confidence", decreasing = TRUE)
+inspect(head(rules_confidence))
+
+
+head (transaction_1)
+summary(transaction_1)
+str(transaction_1)
+
+
+itemFrequencyPlot(transaction_1, topN=10)
+
+itemFrequencyPlot(transaction_1, topN=20)
+
+itemFrequencyPlot(transaction_1, decreasing =TRUE) [1:topN]
+
+least_items= barplot(sort(itemFrequency(transaction_1), decreasing = TRUE))
+least_items
+least_items= barplot(sort(itemFrequency(transaction_1), decreasing = TRUE, 10))
+
+inspect(head(sort(rules, by = "lift"), 10))
+plot (rules)
+plot (rules, method ="grouped")
+
+
+plot(rules, method ="graph")
+
+plot (head(sort(rules, by ="lift"),5), method = "graph")
+
+plot (head(sort(rules, by ="lift"),50), method = "graph")
+
+
+dim(order_orderid_train_select)
+
+# merge order_products_train and orders on order_id
+order_orderid_train=merge(order_products_train,orders, by="order_id")
+head(order_orderid_train,5)
+order_orderid_train_select_1=order_orderid_train[, c(5,2,4)]
+kable(head(order_orderid_train_select_1,5))
+
+dim(order_orderid_train_select_1)
+
+order_orderid_train_select_2=order_orderid_train[, c(5,2)]
+head(order_orderid_train_select_2,5)
+
+dim(order_orderid_train_select_2)
+
+hist(order_orderid_train_select_2$user_id)
+hist(order_orderid_train$user_id)
+
+#convert the product_id to a vector of factors
+order_orderid_train_select_1$product_id=factor(order_orderid_train_select_1$product_id)
+summary(order_orderid_train_select_1)
+str(order_orderid_train_select_1)
+
+
+#convert the user_id to a vector of factors
+order_orderid_train_select_1$user_id=factor(order_orderid_train_select_1$user_id)
+summary(order_orderid_train_select_1)
+str(order_orderid_train_select_1)
+# check the dimensions of the dataset
+dim(order_orderid_train_select_1)
+levels(order_orderid_train_select_1$user_id)
+levels(order_orderid_train_select_1$product_id)
+levels(order_orderid_train_select_1$reordered)
+sort(unique(order_orderid_train_select_1$reordered), decreasing = F)
+head(order_orderid_train_select_1)
+transaction_2 = as.data.frame(acast(order_orderid_train_sel
+                                    
+# Hour of day buying distribution
+
+orders %>%
+  ggplot(aes(x=order_hour_of_day))+
+  geom_histogram(stat="count", fill = "mediumpurple2")
+
+# Day of week buying distribution
+orders %>%
+  ggplot(aes(x=order_dow))+
+  geom_histogram(stat="count", fill = "purple")
+
+# Recode variables
+
+orders = orders%>% mutate(order_hour_of_day = as.numeric(order_hour_of_day), eval_set = as.factor(eval_set))
+
+# A look at the prior orders
+
+eval_set_prior = orders %>% filter (eval_set == "prior") %>% count (order_number) %>% ggplot(aes(order_number,n))+ geom_line(color = "purple")+geom_point(color="purple")
+#
+eval_set_prior
+eval_set_prior + ggtitle("Plot of prior order") +
+  xlab ("order number") + ylab ("order count")
+
+eval_set_prior = order_orderid_train %>% filter (eval_set == "prior") %>% count (order_id) %>% ggplot(aes(order_id,n))+ geom_line(color = "purple")+geom_point(color="purple")
+
+reorder<- orders %>%
+            ggplot(aes(x=days_since_prior_order))+
+            geom_histogram(stat="count", fill ="purple")
+
+orders %>%
+  ggplot(aes(x=days_since_prior_order))+
+  geom_histogram(stat="count", fill ="skyblue1")
+
+kable(head(orders,5))
+
+# graphical representation of the aisles organization within departments
+products_departments = products %>% group_by(department_id, aisle_id) %>% summarise(n=n())
+kable (head(products_departments,5))
+dim (products_departments)
+str (products_departments)
+
+products_departments = products %>% group_by(department_id, aisle_id)
+products_departments = products_departments %>% left_join(departments, by = "department_id", aisles, by = "aisle_id")
+products_departments = products_departments %>% left_join(departments, by = "department_id")
+products_departments = products_departments %>% left_join( aisles, by = "aisle_id")
+kable (head (products_departments,5))
+
+products_view = order_products_train %>% group_by(product_id) %>% summarize (count=n()) %>% left_join(products, by"product_id") %>%
+  
+  group_by(department_id, aisle_id) %>%
+  summarize(sumcount=sum(count)) %>%
+  left_join(products_departments, by = c("department_id" , "aisle_id")) %>% mutate (onesize = 1)
+
+product_arrangement <- order_products_prior %>%
+  group_by(product_id) %>%
+  summarize (count=n()) %>%
+  left_join(products) %>%
+  left_join(departments) %>%
+  left_join(aisles) %>%
+  group_by(department, aisle) %>%
+  summarize(count2 =sum(count))
+
+product_bought <- order_products_train %>%
+  group_by(product_id) %>%
+  summarize (count=n()) %>%
+  left_join(products) %>%
+  left_join(departments) %>%
+  left_join(aisles) %>%
+  group_by(department, aisle) %>%
+  summarize(count2 =sum(count))
+
+treemap(product_bought, index =c("department", "aisle"), vSize = "count2", title = " ", palette = "Set2", border.col="#FFFFFF")
+
+
+
+product_arrangement_1 <- products %>%
+  group_by(aisle_id, department_id) %>%
+  summarize (count=n()) %>%
+  ungroup() %>%
+  left_join(aisles) %>%
+  left_join(departments) %>%
+  group_by(department, aisle) %>%
+  summarize(count2 =sum(count))
+
+treemap(product_arrangement_1, index =c("department", "aisle"), vSize = "count2", title = " ", palette = "Set2", border.col="#FFFFFF")
