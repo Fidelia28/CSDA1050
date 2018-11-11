@@ -48,7 +48,8 @@ summary(aisles)
 str(aisles)
 sample_submission=read.csv("sample_submission.csv")
 head(sample_submission,10)
-#merge order_products_train and products_subset on product_id, to include the product names in the dataset of interest 
+
+# merge order_products_train and products_subset on product_id, to include the product names in the dataset of interest 
 order_productnames_train=merge(order_products_train,products_subset, by="product_id")
 
 head(order_productnames_train,5)
@@ -68,7 +69,7 @@ head(order_orderid_train_select,5)
 
 
 
-#select order_id and order_name
+# select order_id and order_name
 order_productnames_train_select=order_productnames_train[, c(2,6)]
 head(order_productnames_train_select,5)
 summary(order_productnames_train_select)
@@ -79,22 +80,16 @@ order_productnames_train_select$order_id=factor(order_productnames_train_select$
 # rename the order_productnames_train_select table to transaction table
 transaction_table = order_productnames_train_select
 head(transaction_table, 5)
+
 # view content of the transaction table 
-str(order_productnames_train_select)
-str(transaction_table)
-summary(order_productnames_train_select)
-#replace the missing category in department with 'extra'
-levels(departments$department) = c(levels (departments$department),"extra")
-departments$department<-replace(departments$department, departments$department =="missing", "extra")
-departments
 summary(transaction_table)
-
 str(transaction_table)
-
 write.csv(transaction_table, "transaction_table.csv")
 
+# convert the dataset to sparse dataset
 transaction_1 <- read.transactions(file.choose(),
                                    format = "single", sep=",", cols =c("order_id", "product_name"))
+# file is "transaction_table.csv"
 
 head(transaction_1,5)
 
@@ -115,12 +110,11 @@ head (transaction_1)
 summary(transaction_1)
 str(transaction_1)
 
-
+# most frequent items
 itemFrequencyPlot(transaction_1, topN=10)
-
 itemFrequencyPlot(transaction_1, topN=20)
 
-itemFrequencyPlot(transaction_1, decreasing =TRUE) [1:topN]
+# least frequent items
 
 least_items= barplot(sort(itemFrequency(transaction_1), decreasing = TRUE))
 least_items
@@ -136,7 +130,6 @@ plot(rules, method ="graph")
 plot (head(sort(rules, by ="lift"),5), method = "graph")
 
 plot (head(sort(rules, by ="lift"),50), method = "graph")
-
 
 dim(order_orderid_train_select)
 
@@ -156,16 +149,17 @@ dim(order_orderid_train_select_2)
 hist(order_orderid_train_select_2$user_id)
 hist(order_orderid_train$user_id)
 
-#convert the product_id to a vector of factors
+# convert the product_id to a vector of factors
 order_orderid_train_select_1$product_id=factor(order_orderid_train_select_1$product_id)
 summary(order_orderid_train_select_1)
 str(order_orderid_train_select_1)
 
 
-#convert the user_id to a vector of factors
+# convert the user_id to a vector of factors
 order_orderid_train_select_1$user_id=factor(order_orderid_train_select_1$user_id)
 summary(order_orderid_train_select_1)
 str(order_orderid_train_select_1)
+
 # check the dimensions of the dataset
 dim(order_orderid_train_select_1)
 levels(order_orderid_train_select_1$user_id)
@@ -193,6 +187,7 @@ orders = orders%>% mutate(order_hour_of_day = as.numeric(order_hour_of_day), eva
 # A look at the prior orders
 
 eval_set_prior = orders %>% filter (eval_set == "prior") %>% count (order_number) %>% ggplot(aes(order_number,n))+ geom_line(color = "purple")+geom_point(color="purple")
+
 #
 eval_set_prior
 eval_set_prior + ggtitle("Plot of prior order") +
@@ -225,15 +220,9 @@ products_view = order_products_train %>% group_by(product_id) %>% summarize (cou
   summarize(sumcount=sum(count)) %>%
   left_join(products_departments, by = c("department_id" , "aisle_id")) %>% mutate (onesize = 1)
 
-product_arrangement <- order_products_prior %>%
-  group_by(product_id) %>%
-  summarize (count=n()) %>%
-  left_join(products) %>%
-  left_join(departments) %>%
-  left_join(aisles) %>%
-  group_by(department, aisle) %>%
-  summarize(count2 =sum(count))
 
+
+# products ordered distribution
 product_bought <- order_products_train %>%
   group_by(product_id) %>%
   summarize (count=n()) %>%
@@ -246,7 +235,7 @@ product_bought <- order_products_train %>%
 treemap(product_bought, index =c("department", "aisle"), vSize = "count2", title = " ", palette = "Set2", border.col="#FFFFFF")
 
 
-
+# products organization in aisle and department
 product_arrangement_1 <- products %>%
   group_by(aisle_id, department_id) %>%
   summarize (count=n()) %>%
