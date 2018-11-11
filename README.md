@@ -199,9 +199,6 @@ eval_set_prior + ggtitle("Plot of prior order") +
 
 eval_set_prior = order_orderid_train %>% filter (eval_set == "prior") %>% count (order_id) %>% ggplot(aes(order_id,n))+ geom_line(color = "purple")+geom_point(color="purple")
 
-reorder<- orders %>%
-            ggplot(aes(x=days_since_prior_order))+
-            geom_histogram(stat="count", fill ="purple")
 
 orders %>%
   ggplot(aes(x=days_since_prior_order))+
