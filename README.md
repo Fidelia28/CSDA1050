@@ -26,18 +26,85 @@ str(products_subset)
 
 
 products_subset %>% head()
-ggplot(data = products_subset) + geom_bar(mapping = aes(x=product_name))
+
 
 products = products_subset [, c(2,3,4,5)]
 kable(head(products, 5))
 str (products)
 
+
+
 aisles =read.csv("aisles.csv")
 kable(head(aisles, 5))
 str (aisles)
 
-#recode variables
+# recode variables
 orders = orders %>% mutate (order_hour_of_day = as.numeric(order_hour_of_day), eval_set = as.factor(eval_set))
+
+products_subset = read.csv("products_subset.csv")
+kable(head(products_subset,5))
+str(products_subset)
+# there are 48170 observations and 11 variables, 187 missing aisle_ids and 157 missing department_ids
+summary (products_subset)
+
+products_subset %>% head()
+
+
+products = products_subset [, c(2,3,4,5)]
+kable(head(products, 5))
+str (products)
+summary (products)
+
+aisles =read.csv("aisles.csv")
+kable(head(aisles, 5))
+str (aisles)
+summary (aisles)
+
+
+write.csv(products, "products.csv")
+# select only aisle_id and department_id from products (48170 0bsrvations, 2 variables)
+aisle_dept <- subset(products,select=c(aisle_id, department_id))
+head(aisle_dept,10)
+
+# print aisle_dept where department_id is missing (there are 79 observations)
+missing_department_id <- aisle_dept[is.na(aisle_dept$department_id),]
+
+
+# remove duplicates from aisle_deparment (there are 233 observations and 2 variables)
+aisle_dept_1 <- unique(aisle_dept)
+
+# remove all the missing values from department_id column in aisle_dept (233-79= 154 observations)
+aisle_dept_2 <- aisle_dept_1[!is.na(aisle_dept_1$department_id),]
+
+head(aisle_dept_2,10)
+# there are 20 missing missing aisle_id records
+summary(aisle_dept_2)
+write.csv(aisle_dept_2, "aisle_dept_2.csv")
+
+# print aisle_dept_2 where aisle_id is NA's (there were 20 observations)
+aisle_dept_2[is.na(aisle_dept_2$aisle_id),]
+
+# merge departments and aisles dataset to aisle_dept_2
+aisle_dept_3 = merge(aisle_dept_2,departments,by="department_id",all.x=TRUE)
+aisle_dept_4 = merge(aisle_dept_3,aisles,by="aisle_id",all.x=TRUE)
+
+head(aisle_dept_4,100)
+dim (aisle_dept_4)
+str(aisle_dept_4)
+# 154 observations, 4 variables with 20 missing aisle_id
+summary(aisle_dept_4)
+write.csv(aisle_dept_4, "aisle_dept_4.csv")
+
+# print products where aisle_id and departments_id are missing (There are no rows with missing department as well as missing aisle)
+products[is.na(products$aisle_id) & is.na(products$department_id),]
+
+# 157 products had missing department_Id, and 186 products have no aisle_id. Match department_id from aisle_dept_4 where department_id is missing in products
+prducts <- products$department_id[is.na(products$department_id)] <- aisle_dept_4$department_id[match(products$aisle_id[is.na(products$department_id)],aisle_dept_4$aisle_id)]
+
+#  48170 producst observations, 4 variables. 186 products missing aisle_id
+summary(products)
+str(products)
+
 
 
 library(arules)
@@ -87,18 +154,21 @@ str(transaction_table)
 write.csv(transaction_table, "transaction_table.csv")
 
 # convert the dataset to sparse dataset
-transaction_1 <- read.transactions(file.choose(),
+transaction <- read.transactions(file.choose(),
                                    format = "single", sep=",", cols =c("order_id", "product_name"))
 # file is "transaction_table.csv"
 
-head(transaction_1,5)
+head(transaction,5)
 
 # training apriori function on the transaction_1 dataset
-rules = apriori (transaction_1, parameter =list (support=0.004,
+rules = apriori (transaction, parameter =list (support=0.004,
                                                  confidence =0.005))
 
-rules = apriori (transaction_1, parameter =list (support=0.004,
+rules = apriori (transaction, parameter =list (support=0.004,
                                                  confidence =0.05))
+
+rules = apriori (transaction, parameter =list (support=0.005,
+                                                 confidence =0.005))
 
 LIST(head(transaction_1,5))
 
@@ -106,19 +176,19 @@ rules_confidence <- sort(rules, by = "confidence", decreasing = TRUE)
 inspect(head(rules_confidence))
 
 
-head (transaction_1)
-summary(transaction_1)
-str(transaction_1)
+head (transaction)
+summary(transaction)
+str(transaction)
 
 # most frequent items
-itemFrequencyPlot(transaction_1, topN=10)
-itemFrequencyPlot(transaction_1, topN=20)
+itemFrequencyPlot(transaction, topN=10)
+itemFrequencyPlot(transaction, topN=20)
 
 # least frequent items
 
-least_items= barplot(sort(itemFrequency(transaction_1), decreasing = TRUE))
+least_items= barplot(sort(itemFrequency(transaction), decreasing = TRUE))
 least_items
-least_items= barplot(sort(itemFrequency(transaction_1), decreasing = TRUE, 10))
+least_items= barplot(sort(itemFrequency(transaction), decreasing = TRUE, 10))
 
 inspect(head(sort(rules, by = "lift"), 10))
 plot (rules)
